@@ -67,7 +67,12 @@ usertrap(void)
     syscall();
   } else if((which_dev = devintr()) != 0){
     // ok
-  } else {
+  }else if((r_scause() == 13 || r_scause() == 15) && my_uvmcheckcowpage(r_stval())){
+    if(my_uvmcowcopy(r_stval()) == -1){
+      p->killed = 1;
+    }
+  } 
+  else {
     printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
     printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
     p->killed = 1;
@@ -218,3 +223,30 @@ devintr()
   }
 }
 
+int my_uvmcheckcowpage(uint64 va){
+  pte_t *pte;
+  struct proc *p = myproc();
+  return va < p->sz
+    && ((pte = walk(p->pagetable,va,0)) != 0)
+    && (*pte & PTE_V)
+    && (*pte & PTE_COW);
+}
+
+int my_uvmcowcopy(uint64 va){
+  pte_t *pte;
+  struct proc *p = myproc();
+  if((pte = walk(p->pagetable,va,0)) == 0){
+    panic("uvmcowcopy: walk");
+  }
+  uint64 pa = PTE2PA(*pte);
+  uint64 new = (uint64)my_kcopy_n_deref((void*)pa);
+  if(new == 0){
+    return -1;
+  }
+  uint64 flags = (PTE_FLAGS(*pte) | PTE_W) & ~PTE_COW;
+  uvmunmap(p->pagetable,PGROUNDDOWN(va),1,0);
+  if(mappages(p->pagetable,PGROUNDDOWN(va),PGSIZE,new,flags) == -1){
+    panic("uvmcowcopy: mappages");
+  }
+  return 0;
+}
