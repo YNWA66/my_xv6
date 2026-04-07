@@ -16,7 +16,7 @@ int main(int argc,char *argv[]){
     char *p = buf,*lastp = buf;
     char *argsbuf[128];
     char **args = argsbuf;
-
+    //将命令行参数放在argsbuf中
     for(int i = 1;i<argc;++i){
         *args = argv[i];
         args++;
@@ -27,8 +27,10 @@ int main(int argc,char *argv[]){
         if(*p == ' ' || *p == '\n'){
             char *newline = p;
             *p = '\0';
+            //将当前参数的起始地址放在argsbuf中
             *(pa++) = lastp;
             lastp = p+1;
+            //如果读到换行符，说明当前参数已经结束了，可以执行命令了
             if(*newline == '\n'){
                 *pa = 0;
                 run(argv[1],argsbuf);
