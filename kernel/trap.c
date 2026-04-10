@@ -69,7 +69,7 @@ usertrap(void)
     // ok
   }else {
     uint64 va = r_stval();
-    if((r_scause() == 13 || r_scause() == 15) && my_shouldallocate(va)){
+    if((r_scause() == 13 || r_scause() == 15) && my_shouldallocate(va)){//惰性分配
       my_lazyallocate(va);
     }else{
       printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);

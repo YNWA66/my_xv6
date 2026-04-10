@@ -457,7 +457,7 @@ int my_shouldallocate(uint64 va){
   pte_t *pte;
   struct proc *p = myproc();
   return va < p->sz
-      && PGROUNDDOWN(va) != r_sp()
+      && PGROUNDDOWN(va) != r_sp()  //不在gaurdpage
       && (((pte = walk(p->pagetable,va,0)) == 0) || ((*pte & PTE_V) == 0));
 }
 

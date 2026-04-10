@@ -47,12 +47,12 @@ sys_sbrk(void)
   if(argint(0, &n) < 0)
     return -1;
   addr = myproc()->sz;
-  // if(growproc(n) < 0)
+  // if(growproc(n) < 0)  //惰性分配，不进行实际内存分配，只记录分配内存大小
   //   return -1;
   struct proc *p = myproc();
   if(n>0){
     p->sz += n;
-  }else if(p->sz + n > 0){
+  }else if(p->sz + n > 0){//减少内存需要立即执行，避免内存空间不足
     p->sz = uvmdealloc(p->pagetable,p->sz,p->sz+n);
   }else{
     return -1;
