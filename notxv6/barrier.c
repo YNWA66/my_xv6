@@ -31,9 +31,9 @@ barrier()
   // then increment bstate.round.
   //
   pthread_mutex_lock(&bstate.barrier_mutex);
-  if(++bstate.nthread < nthread){
+  if(++bstate.nthread < nthread){//未达到全局nthread，休眠
     pthread_cond_wait(&bstate.barrier_cond,&bstate.barrier_mutex);
-  }else{
+  }else{//唤醒其他线程
     bstate.nthread = 0;
     bstate.round++;
     pthread_cond_broadcast(&bstate.barrier_cond);
