@@ -104,10 +104,12 @@ void my_krefpage(void* pa){
 
 void *my_kcopy_n_deref(void* pa){
   acquire(&pgreflock);
+  //引用计数为1，直接使用
   if(PA2PGREF(pa) <= 1){
     release(&pgreflock);
     return pa;
   }
+  //引用计数-1，返回新物理页
   uint64 newpa = (uint64)kalloc();
   if(newpa == 0){
     release(&pgreflock);

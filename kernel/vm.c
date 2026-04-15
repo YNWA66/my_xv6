@@ -320,13 +320,13 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
       panic("uvmcopy: page not present");
     pa = PTE2PA(*pte);
     if(*pte & PTE_W){
-      *pte = (*pte & ~PTE_W) | PTE_COW;
+      *pte = (*pte & ~PTE_W) | PTE_COW; //对于可写页，标记为不可写且是写时复制页
     }
     flags = PTE_FLAGS(*pte);
-    if(mappages(new,i,PGSIZE,pa,flags) != 0){
+    if(mappages(new,i,PGSIZE,pa,flags) != 0){//拷贝页表给子进程
       goto err;
     }
-    my_krefpage((void*)pa);
+    my_krefpage((void*)pa);//引用计数+1
     // if((mem = kalloc()) == 0)
     //   goto err;
     // memmove(mem, (char*)pa, PGSIZE);
